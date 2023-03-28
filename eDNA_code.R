@@ -11,17 +11,17 @@ library(rstan)
 library(StanHeaders)
 
 
-eDNA_compiled_results <- read_excel("~/Desktop/eDNA/qPCR results/eDNA_compiled_results.xlsx") %>% 
+eDNA_compiled_results <- read_csv("data/average_sample_results.csv") %>% 
   clean_names()
 
-clean_results <- eDNA_compiled_results %>% replace_na(list(ct_mean=0, ct_sd=0,quantity=0,quantity_mean=0,quantity_sd=0)) %>% 
+clean_results <- eDNA_compiled_results %>% replace_na(list(ct_mean=0, ct_sd=0,quantity_mean=0,quantity_sd=0)) %>% 
   ungroup %>% 
-  mutate(quant_cat=case_when(quantity==0~0, TRUE~1),
+  mutate(quant_cat=case_when(quantity_mean==0~0, TRUE~1),
          above_below=case_when(location=="above"~0,
                                location=="below"~1),
          river_cat=case_when(river=="big sioux"~0,
                              river=="vermillion"~1),
-         quant_1000=quantity/1000,
+         quant_1000=quantity_mean/1000,
          quant_mean_s=scale(quantity_mean))
 
 
@@ -133,7 +133,7 @@ clean_results %>%
 clean_results %>% filter(location == "above") %>% 
   filter(river == "vermillion")
 
-clean_results %>% filter(is.na(river)) %>% view
+# clean_results %>% filter(is.na(river)) %>% view
 
 
 
