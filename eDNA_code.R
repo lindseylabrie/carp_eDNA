@@ -10,6 +10,7 @@ library(brms)
 library(rstan)
 library(StanHeaders)
 
+######### data ########
 
 eDNA_compiled_results <- read_csv("data/average_sample_results.csv") %>% 
   clean_names()
@@ -22,66 +23,16 @@ clean_results <- eDNA_compiled_results %>% replace_na(list(ct_mean=0, ct_sd=0,qu
          river_cat=case_when(river=="big sioux"~0,
                              river=="vermillion"~1),
          quant_1000=quantity_mean/1000,
-         quant_mean_s=scale(quantity_mean))
+         quant_mean_s=scale(quantity_mean),
+         target_color=case_when(target_name=="SVC"~"deeppink1",
+                                target_name=="BHC"~"darkslategray3"),
+         filter_color=case_when(filter_method=="field"~"lightgrey",
+                                 filter_method=="lab"~"gray40"))
 
+pilot_averages <- read_csv("data/pilot_averages.csv") %>% 
+  replace_na(list(ct_mean=0, ct_sd=0,quantity_mean=0,quantity_sd=0))
 
-##### extra unnecessary stuff #####
-
-# mod_prob_detect <- brm(quant_cat~quant_mean_s,
-#     data=clean_results,
-#     family=bernoulli(),
-#     prior=c(prior(normal(-10,1), class= "Intercept"),
-#             prior(normal(0,1), class= "b")),
-#             chains=4, iter = 2000)
-# 
-# plot(conditional_effects(mod_prob_detect, re_formula=NULL), points = T)
-# 
-# pp_check(mod_prob_detect)
-# 
-# cond_effect_mod_prob_detect <- conditional_effects(mod_prob_detect)
-# cond_effect_mod_prob_detect$quant_mean_s
-# 
-# cond_effect_mod_prob_detect$quant_mean_s %>% 
-#   ggplot(aes(x=quant_mean_s)) +
-#   geom_pointrange(aes(y=estimate__, ymin=lower__, ymax=upper__))+
-#   geom_point(data = mod_prob_detect$data, aes(x=quant_mean_s, y=quant_cat))+
-#   theme_default()
-# 
-# cond_data_mod_prob_detect <- mod_prob_detect$data %>% distinct(quant_mean_s)
-# 
-# posts_mod_prob_detect <- add_epred_draws(mod_prob_detect, newdata= mod_prob_detect$data %>% 
-#                                  distinct(quant_mean_s) , re_formula = NA)
-# 
-# 
-# posts_mod_prob_detect <- add_predicted_draws(mod_prob_detect, newdata=mod_prob_detect$clean_results %>% 
-#                                        distinct(mod_prob_detect,quant_cat) , re_formula = NA)
-
-# 
-# d_quant_mean_s <- d %>% distinct(length_mm, length_s)
-# 
-# PosteriorGSIlength <- posts_gsi_all %>%
-#   group_by(length_s, lab_sex) %>%
-#   left_join(d_lengthgsi) %>%
-#   median_qi(.prediction) %>%
-#   mutate(length_mm = (length_s*sd(d$length_mm)) + mean(d$length_mm)) %>%
-#   ggplot(aes(x =length_mm, y = .prediction, fill = lab_sex)) +
-#   geom_line() +
-#   geom_ribbon(aes(ymin = .lower, ymax = .upper),
-#               alpha = 0.2) +
-#   geom_point(data = d,
-#              aes(y = gsi)) +
-#   labs(title= "Blue Sucker GSI Prediction",
-#        subtitle="Blue and pink bars incorporate the variation in individuals",
-#        x="Length (mm)",
-#        y="Predicted GSI")
-# 
-# ggsave(PosteriorGSIlength, file = "plots/PosteriorGSIlength.png", dpi = 750, width = 7, height = 5, units = "in")
-
-
-##### real model #####
-
-# next step: same model plus below/above dam after adjusting for quantity, 
-# river as random effect and below/above in separate column
+##### modeling probability of a positive sample above and below the barriers #####
 
 get_prior(quant_cat~quant_1000*location*river + (1|sample_name) + (1|target_name),
           data=clean_results,
@@ -121,6 +72,7 @@ ggsave(preds_graph, file = "plots/positive_predictions.png", dpi = 750,
 conditional_effects(mod_prob_ab, conditions = tibble(target_name = "BHC"))
 
 pp_check(mod_prob_ab)
+bayes_R2(mod_prob_ab)
 
 ggplot(data=clean_results,aes(x=quant_1000, y=quant_cat))+
   geom_point()+
@@ -134,8 +86,6 @@ clean_results %>% filter(location == "above") %>%
   filter(river == "vermillion")
 
 # clean_results %>% filter(is.na(river)) %>% view
-
-
 
 pred_quant = mod_prob_ab$data %>% 
   distinct(location, river, target_name) %>% 
@@ -161,7 +111,7 @@ ggsave(pred_quant_plot, file = "plots/loc_spec_probs.png", dpi = 750,
        width = 7, height = 5, units = "in")
 
 
-# Sensitivity analysis below, doubled the standard deviation 
+# Sensitivity analysis; doubled the standard deviation 
 
 mod_prob_ab_sens <- brm(quant_cat~quant_1000*location*river + (1|sample_name) + (1|target_name),
                         data=clean_results,
@@ -198,8 +148,96 @@ ggsave(preds_sens_graph, file = "plots/sensitivity_analysis.png", dpi = 750,
 conditional_effects(mod_prob_ab_sens, conditions = tibble(target_name = "BHC"))
 
 pp_check(mod_prob_ab_sens)
+bayes_R2(mod_prob_ab_sens)
 
 
-# what's next? 
-# 1) Model for differences between field filtered and lab filtered
-# 2) Model for pilot study samples: how many samples do you need to get a positive detection?
+####### Field Filtered vs. Lab Filtered ######
+
+get_prior(quant_cat~filter_method*target_name + (1|sample_name),
+          data=clean_results,
+          family=gaussian())
+
+mod_prob_filter <- brm(quant_cat~filter_method*target_name + (1|sample_name),
+                   data=clean_results,
+                   family=gaussian(),
+                   # prior=c(prior(normal(-10,1), class= "Intercept"),
+                   #         prior(normal(0,1), class= "b")),
+                   # sample_prior = "only",
+                   chains=1, iter = 2000)
+
+preds_filter = mod_prob_filter$data %>% 
+  distinct(target_name, filter_method) %>% 
+  expand_grid(quant_cat = mean(clean_results$quant_cat), 
+              sample_name = "new") %>% 
+  add_epred_draws(mod_prob_filter, allow_new_levels = T) 
+
+
+preds_filter_graph <- preds_filter %>% 
+  ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~target_name)+
+  labs(y="Probability of detection") +  
+  geom_point(data = mod_prob_filter$data, 
+             aes(y = quant_cat, color = filter_method),
+                 # group = interaction(filter_method, target_name)), 
+             position = position_jitterdodge(jitter.width = 0.3, 
+                                             jitter.height = 0),
+             shape = 21, alpha = 0.2)
+
+ggsave(preds_filter_graph, file = "plots/positive_predictions.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+conditional_effects(mod_prob_filter, conditions = tibble(target_name = "BHC"))
+
+pp_check(mod_prob_filter)
+bayes_R2(mod_prob_filter)
+
+
+######## pilot study model #########
+
+# 2 separate models: 
+# first question: how many samples needed to get positive detection
+# second question: is there a difference in quantity between the two protocols
+# (kristie's and qiagen)
+
+
+get_prior(quantity_mean~,
+          data=pilot_averages,
+          family=bernoulli())
+
+mod_prob_pilot <- brm(quantity_mean~,
+                   data=pilot_averages,
+                   family=bernoulli(),
+                   # prior=c(prior(normal(-10,1), class= "Intercept"),
+                   #         prior(normal(0,1), class= "b")),
+                   # sample_prior = "only",
+                   chains=1, iter = 2000)
+
+
+preds_pilot = mod_prob_pilot$data %>% 
+  distinct() %>% 
+  expand_grid(quant_mean = mean(pilot_averages$quant_1000), 
+              sample_name = "new") %>% 
+  add_epred_draws(mod_prob_ab, allow_new_levels = T) 
+
+
+preds_pilot_graph <- preds_pilot %>% 
+  ggplot(aes(x = , y = .epred, fill = river)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~target_name)+
+  labs(y="Probability of a positive sample") +  
+  geom_point(data = mod_prob_pilot$data, 
+             aes(y = quant_cat, color = river, 
+                 group = interaction(river, location)), 
+             position = position_jitterdodge(jitter.width = 0.3, 
+                                             jitter.height = 0),
+             shape = 21, alpha = 0.2)
+
+ggsave(preds_pilot_graph, file = "plots/positive_predictions.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+conditional_effects(mod_prob_pilot, conditions = tibble(target_name = "BHC"))
+
+pp_check(mod_prob_pilot)
+bayes_R2(mod_prob_pilot)
+

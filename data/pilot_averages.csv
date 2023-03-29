@@ -1,0 +1,41 @@
+﻿sample_name,target_name,reporter,ct_mean,ct_sd,quantity_mean,quantity_sd,y_int,r_2,slope,efficiency,ct_threshold,baseline_start,baseline_end,cq_conf,plate,river,location,month,year,protocol,volume_filtered_ml
+BS5Q,BHC,VIC,48.048,0.289,0.051,0.010,43.465,0.993,-3.540,91.654,0.047,3,42,0.736,23Carp_06,big sioux,pilot,september,2022,qiagen,100
+BS5Q,SVC,FAM,48.038,8.041,4.314,7.469,42.710,0.993,-3.532,91.922,0.118,3,43,0.110,23Carp_06,big sioux,pilot,september,2022,qiagen,100
+BS5K,BHC,VIC,37.751,1.839,59.272,47.388,43.465,0.993,-3.540,91.654,0.052,3,36,0.907,23Carp_14,big sioux,pilot,september,2022,kristie,100
+BS5K,SVC,FAM,40.310,,4.782,,42.710,0.993,-3.532,91.922,0.097,3,35,0.814,23Carp_14,big sioux,pilot,september,2022,kristie,100
+VP1K,BHC,VIC,43.788,4.111,2.747,3.712,43.465,0.993,-3.540,91.654,0.049,3,36,0.845,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP1K,SVC,FAM,40.783,2.116,6.076,5.537,42.710,0.993,-3.532,91.922,0.063,3,37,0.881,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP1Q,BHC,VIC,0.000,0,0.000,0,43.465,0.993,-3.540,91.654,0.049,3,54,0.000,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP1Q,SVC,FAM,43.990,5.000,1.899,1.747,42.710,0.993,-3.532,91.922,0.063,3,37,0.773,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP2K,BHC,VIC,46.754,,0.118,,43.465,0.993,-3.540,91.654,0.049,3,40,0.772,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP2K,SVC,FAM,42.200,3.862,6.475,7.955,42.710,0.993,-3.532,91.922,0.063,3,39,0.850,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP2Q,BHC,VIC,43.466,6.068,8.176,11.476,43.465,0.993,-3.540,91.654,0.049,3,40,0.740,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP2Q,SVC,FAM,43.604,3.168,1.251,1.068,42.710,0.993,-3.532,91.922,0.063,3,40,0.803,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP3K,BHC,VIC,44.707,0.332,0.451,0.097,43.465,0.993,-3.540,91.654,0.049,3,38,0.707,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP3K,SVC,FAM,44.173,1.484,0.524,0.429,42.710,0.993,-3.532,91.922,0.063,3,37,0.790,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP3Q,BHC,VIC,45.377,0.223,0.290,0.042,43.465,0.993,-3.540,91.654,0.049,3,38,0.741,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP3Q,SVC,FAM,45.975,1.980,0.213,0.241,42.710,0.993,-3.532,91.922,0.063,3,39,0.829,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP4K,BHC,VIC,41.064,4.057,14.708,12.696,43.465,0.993,-3.540,91.654,0.049,3,35,0.826,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP4K,SVC,FAM,42.338,1.310,1.637,1.237,42.710,0.993,-3.532,91.922,0.063,3,37,0.867,23Carp_20,vermillion,pilot,september,2022,kristie,200
+VP4Q,BHC,VIC,47.442,0.072,0.075,0.004,43.465,0.993,-3.540,91.654,0.049,3,39,0.741,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+VP4Q,SVC,FAM,45.321,3.097,0.955,1.766,42.710,0.993,-3.532,91.922,0.063,3,40,0.856,23Carp_20,vermillion,pilot,september,2022,qiagen,200
+BS1K,BHC,VIC,40.602,2.561,12.160,11.856,43.465,0.993,-3.540,91.654,0.040,3,36,0.905,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS1K,SVC,FAM,44.869,2.791,,,42.710,0.993,-3.532,91.922,0.056,3,54,0.000,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS1Q,BHC,VIC,47.204,1.986,0.127,0.130,43.465,0.993,-3.540,91.654,0.040,3,39,0.774,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS1Q,SVC,FAM,43.230,4.413,5.075,8.303,42.710,0.993,-3.532,91.922,0.056,3,39,0.926,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS2K,BHC,VIC,40.621,3.871,18.268,15.520,43.465,0.993,-3.540,91.654,0.040,3,35,0.856,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS2K,SVC,FAM,45.568,4.731,0.696,0.959,42.710,0.993,-3.532,91.922,0.056,3,41,0.816,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS2Q,BHC,VIC,48.299,,0.043,,43.465,0.993,-3.540,91.654,0.040,3,43,0.749,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS2Q,SVC,FAM,41.741,3.314,6.369,9.397,42.710,0.993,-3.532,91.922,0.056,3,40,0.955,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS3K,BHC,VIC,40.514,3.535,17.181,13.909,43.465,0.993,-3.540,91.654,0.040,3,35,0.810,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS3K,SVC,FAM,43.900,,0.461,,42.710,0.993,-3.532,91.922,0.056,3,39,0.859,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS3Q,BHC,VIC,39.723,7.075,94.461,81.922,43.465,0.993,-3.540,91.654,0.040,3,32,0.717,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS3Q,SVC,FAM,51.157,,0.004,,42.710,0.993,-3.532,91.922,0.056,3,45,0.587,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS4K,BHC,VIC,43.367,4.310,8.957,15.119,43.465,0.993,-3.540,91.654,0.040,3,35,0.849,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS4K,SVC,FAM,44.920,2.649,,,42.710,0.993,-3.532,91.922,0.056,3,54,0.000,23Carp_21,big sioux,pilot,september,2022,kristie,100
+BS4Q,BHC,VIC,43.706,4.881,10.169,17.290,43.465,0.993,-3.540,91.654,0.040,3,35,0.822,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+BS4Q,SVC,FAM,44.006,4.370,3.157,5.212,42.710,0.993,-3.532,91.922,0.056,3,41,0.769,23Carp_21,big sioux,pilot,september,2022,qiagen,100
+VP5K,BHC,VIC,0.000,0,0,0,43.465,0.993,-3.540,91.654,0.050,3,54,0.000,23Carp_22,vermillion,pilot,september,2022,kristie,200
+VP5K,SVC,FAM,40.870,2.126,5.227,4.271,42.710,0.993,-3.532,91.922,0.084,3,34,0.741,23Carp_22,vermillion,pilot,september,2022,kristie,200
+VP5Q,BHC,VIC,38.060,0.773,35.785,17.264,43.465,0.993,-3.540,91.654,0.050,3,34,0.802,23Carp_22,vermillion,pilot,september,2022,qiagen,200
+VP5Q,SVC,FAM,44.394,5.649,2.443,3.302,42.710,0.993,-3.532,91.922,0.084,3,37,0.777,23Carp_22,vermillion,pilot,september,2022,qiagen,200
