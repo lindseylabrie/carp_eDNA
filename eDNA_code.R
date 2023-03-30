@@ -8,6 +8,7 @@ library(readxl)
 library(janitor)
 library(brms)
 library(rstan)
+library(scales)
 library(StanHeaders)
 
 ######### data ########
@@ -30,7 +31,8 @@ clean_results <- eDNA_compiled_results %>% replace_na(list(ct_mean=0, ct_sd=0,qu
                                  filter_method=="lab"~"gray40"))
 
 pilot_averages <- read_csv("data/pilot_averages.csv") %>% 
-  replace_na(list(ct_mean=0, ct_sd=0,quantity_mean=0,quantity_sd=0))
+  replace_na(list(ct_mean=0, ct_sd=0,quantity_mean=0,quantity_sd=0)) %>% 
+  mutate(quant_cat=case_when(quantity_mean==0~0, TRUE~1))
 
 ##### modeling probability of a positive sample above and below the barriers #####
 
@@ -155,15 +157,15 @@ bayes_R2(mod_prob_ab_sens)
 
 get_prior(quant_cat~filter_method*target_name + (1|sample_name),
           data=clean_results,
-          family=gaussian())
+          family=bernoulli())
 
 mod_prob_filter <- brm(quant_cat~filter_method*target_name + (1|sample_name),
                    data=clean_results,
-                   family=gaussian(),
+                   family=bernoulli(),
                    # prior=c(prior(normal(-10,1), class= "Intercept"),
                    #         prior(normal(0,1), class= "b")),
                    # sample_prior = "only",
-                   chains=1, iter = 2000)
+                   chains=4, iter = 2000)
 
 preds_filter = mod_prob_filter$data %>% 
   distinct(target_name, filter_method) %>% 
@@ -178,7 +180,7 @@ preds_filter_graph <- preds_filter %>%
   facet_wrap(~target_name)+
   labs(y="Probability of detection") +  
   geom_point(data = mod_prob_filter$data, 
-             aes(y = quant_cat, color = filter_method),
+             aes(y = quant_cat),
                  # group = interaction(filter_method, target_name)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
@@ -192,6 +194,7 @@ conditional_effects(mod_prob_filter, conditions = tibble(target_name = "BHC"))
 pp_check(mod_prob_filter)
 bayes_R2(mod_prob_filter)
 
+# no need for sensitivity analysis here -Jeff
 
 ######## pilot study model #########
 
@@ -200,44 +203,144 @@ bayes_R2(mod_prob_filter)
 # second question: is there a difference in quantity between the two protocols
 # (kristie's and qiagen)
 
+### How many samples? ###
 
-get_prior(quantity_mean~,
-          data=pilot_averages,
-          family=bernoulli())
+pilot_averages %>%
+ ungroup %>% 
+  group_by(river,target_name) %>%
+  sample_n(1) %>% 
+  distinct(quant_cat) 
 
-mod_prob_pilot <- brm(quantity_mean~,
-                   data=pilot_averages,
-                   family=bernoulli(),
-                   # prior=c(prior(normal(-10,1), class= "Intercept"),
-                   #         prior(normal(0,1), class= "b")),
-                   # sample_prior = "only",
-                   chains=1, iter = 2000)
+### Difference in protocols? ###
 
-
-preds_pilot = mod_prob_pilot$data %>% 
-  distinct() %>% 
-  expand_grid(quant_mean = mean(pilot_averages$quant_1000), 
-              sample_name = "new") %>% 
-  add_epred_draws(mod_prob_ab, allow_new_levels = T) 
-
-
-preds_pilot_graph <- preds_pilot %>% 
-  ggplot(aes(x = , y = .epred, fill = river)) +
-  geom_boxplot(outlier.shape = NA) +
+Protocol_Plot <- ggplot(data=pilot_averages,
+       aes(y=quantity_mean, x=protocol))+
+  geom_point()+
+  geom_boxplot(aes(group=protocol))+
   facet_wrap(~target_name)+
-  labs(y="Probability of a positive sample") +  
-  geom_point(data = mod_prob_pilot$data, 
-             aes(y = quant_cat, color = river, 
-                 group = interaction(river, location)), 
-             position = position_jitterdodge(jitter.width = 0.3, 
-                                             jitter.height = 0),
-             shape = 21, alpha = 0.2)
+  ylab("Mean eDNA quantity")+
+  xlab("Protocol type")
 
-ggsave(preds_pilot_graph, file = "plots/positive_predictions.png", dpi = 750, 
+ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
 
-conditional_effects(mod_prob_pilot, conditions = tibble(target_name = "BHC"))
 
-pp_check(mod_prob_pilot)
-bayes_R2(mod_prob_pilot)
+# probably don't need to run a model based on this. Can use it as a justification for 
+# using Kristie's protocol during extraction. Qiagen and kristie's get large amounts of DNA 
+# as evidenced by the BHC model
 
+# get_prior(quantity_mean~protocol+(1|target_name),
+#           data=pilot_averages,
+#           family=Gamma(),
+#           link="inverse")
+
+# mod_prob_pilot <- brm(quantity_mean~protocol+(1|target_name),
+#                       data=pilot_averages %>% mutate(quantity_mean=quantity_mean+0.001),
+#                       family=Gamma(),
+#                       # prior=c(prior(normal(-10,1), class= "Intercept"),
+#                       #         prior(normal(0,1), class= "b")),
+#                       # sample_prior = "only",
+#                       chains=1, iter = 2000)
+# 
+# 
+# preds_pilot = mod_prob_pilot$data %>% 
+#   expand_grid(quant_mean = mean(pilot_averages$quantity_mean), 
+#               sample_name = "new") %>% 
+#   add_epred_draws(mod_prob_ab, allow_new_levels = T) 
+# 
+# 
+# preds_pilot_graph <- preds_pilot %>% 
+#   ggplot(aes(x = , y = .epred, fill = river)) +
+#   geom_boxplot(outlier.shape = NA) +
+#   facet_wrap(~target_name)+
+#   labs(y="Probability of a positive sample") +  
+#   geom_point(data = mod_prob_pilot$data, 
+#              aes(y = quant_cat, color = river, 
+#                  group = interaction(river, location)), 
+#              position = position_jitterdodge(jitter.width = 0.3, 
+#                                              jitter.height = 0),
+#              shape = 21, alpha = 0.2)
+# 
+# ggsave(preds_pilot_graph, file = "plots/positive_predictions.png", dpi = 750, 
+#        width = 7, height = 5, units = "in")
+# 
+# conditional_effects(mod_prob_pilot, conditions = tibble(target_name = "BHC"))
+# 
+# pp_check(mod_prob_pilot)
+# bayes_R2(mod_prob_pilot)
+
+
+
+
+###### other models, no, sanity checks, to consider ######
+
+# volume of water filtered and quantity of DNA
+
+Volume_Plot_pilot <- ggplot(data=pilot_averages,
+       aes(y=quantity_mean, x=volume_filtered_ml))+
+  geom_point()+
+  geom_boxplot(aes(group=volume_filtered_ml))+
+  facet_wrap(~protocol)+
+  ylab("Mean eDNA quantity")+
+  xlab("Volume filtered")
+
+ggsave(Volume_Plot_pilot, file = "plots/Volume_Plot_pilot.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+Volume_Plot_data <- ggplot(data=clean_results,
+                      aes(y=quantity_mean, x=volume_filtered_ml))+
+  geom_point(aes(color=location))+
+  geom_boxplot(aes(group=location, fill=location))+
+  facet_wrap(~target_name)+
+  ylab("Mean eDNA quantity")+
+  xlab("Volume filtered")+
+  scale_y_log10(labels = label_comma())
+
+ggsave(Volume_Plot_data, file = "plots/Volume_Plot_data.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+# time between sampling and filtering affecting the amount of DNA found in the sample
+
+Time_Plot <- ggplot(data=clean_results,
+       aes(y=quantity_mean, x=time_from_sample_to_filter_hm))+
+  geom_point(aes(color=location))+
+  # geom_boxplot(aes(group=location,fill=location))+
+  facet_wrap(~target_name)+
+  ylab("Mean eDNA quantity")+
+  xlab("Time between sample and filter")+
+  scale_y_log10(labels = label_comma())+ 
+  theme(panel.spacing.x = unit(2, "lines"))
+    
+
+ggsave(Time_Plot, file = "plots/Time_Plot.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+
+# days between filtering and extraction affecting the amount of DNA found in the sample
+
+Filter_to_Extraction <- ggplot(data=clean_results,
+                    aes(y=quantity_mean, x=days_from_filter_to_extract))+
+  geom_point(aes(color=location))+
+  # geom_boxplot(aes(group=location,fill=location))+
+  facet_wrap(~target_name)+
+  ylab("Mean eDNA quantity")+
+  xlab("Days between filtering and extraction")+
+  scale_y_log10(labels = label_comma())+ 
+  theme(panel.spacing.x = unit(2, "lines"))
+
+ggsave(Filter_to_Extraction, file = "plots/Filter_to_Extraction.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
+# days between extraction and qPCR affecting the amount of DNA found in the sample
+
+Extraction_to_qPCR <- ggplot(data=clean_results,
+       aes(y=quantity_mean, x=days_from_extract_to_qpcr))+
+  geom_point(aes(color=location))+
+  # geom_boxplot(aes(group=location,fill=location))+
+  facet_wrap(~target_name)+
+  ylab("Mean eDNA quantity")+
+  xlab("Days between extraction and qPCR")+
+  scale_y_log10(labels = label_comma())
+
+ggsave(Extraction_to_qPCR, file = "plots/Extraction_to_qPCR.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
