@@ -196,9 +196,8 @@ bayes_R2(mod_prob_filter)
 
 # no need for sensitivity analysis here -Jeff
 
-######## pilot study model #########
+######## pilot study #########
 
-# 2 separate models: 
 # first question: how many samples needed to get positive detection
 # second question: is there a difference in quantity between the two protocols
 # (kristie's and qiagen)
@@ -206,10 +205,14 @@ bayes_R2(mod_prob_filter)
 ### How many samples? ###
 
 pilot_averages %>%
- ungroup %>% 
+  ungroup %>% 
   group_by(river,target_name) %>%
   sample_n(1) %>% 
   distinct(quant_cat) 
+
+# at 1 sample for each location with known carp, 4/40 samples are false negatives
+# i.e. a 10% chance that any sample is a false positive. This number halves as the
+# number of samples increases.
 
 ### Difference in protocols? ###
 
@@ -344,3 +347,19 @@ Extraction_to_qPCR <- ggplot(data=clean_results,
 
 ggsave(Extraction_to_qPCR, file = "plots/Extraction_to_qPCR.png", dpi = 750, 
        width = 7, height = 5, units = "in")
+
+# does Month play a role?
+
+Month_Plot <- ggplot(data=clean_results,
+       aes(y=quantity_mean, x=month))+
+  geom_point(aes(color=location))+
+  # geom_boxplot(aes(group=location,fill=location))+
+  facet_wrap(~target_name)+
+  ylab("Mean eDNA quantity")+
+  xlab("Sample month")+
+  scale_y_log10(labels = label_comma())
+#will need to find a way to get the months in order, jitter the results at zero
+
+ggsave(Month_Plot, file = "plots/Month_Plot.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
