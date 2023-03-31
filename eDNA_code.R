@@ -178,13 +178,15 @@ preds_filter_graph <- preds_filter %>%
   ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
   geom_boxplot(outlier.shape = NA) +
   facet_wrap(~target_name)+
-  labs(y="Probability of detection") +  
+  labs(y="Probability of detection",
+       x="Filter method") +  
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
                  # group = interaction(filter_method, target_name)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
-             shape = 21, alpha = 0.2)
+             shape = 21, alpha = 0.5)+
+  theme(legend.position="none")
 
 ggsave(preds_filter_graph, file = "plots/positive_predictions.png", dpi = 750, 
        width = 7, height = 5, units = "in")
@@ -350,16 +352,34 @@ ggsave(Extraction_to_qPCR, file = "plots/Extraction_to_qPCR.png", dpi = 750,
 
 # does Month play a role?
 
+level_order <- c('may', 'july', 'august','september','october') 
+
 Month_Plot <- ggplot(data=clean_results,
        aes(y=quantity_mean, x=month))+
-  geom_point(aes(color=location))+
-  # geom_boxplot(aes(group=location,fill=location))+
+  geom_boxplot(aes(group=month),outlier.shape = NA)+
+  geom_point(aes(color=location),
+             shape=16,
+             position = position_jitterdodge(jitter.width = 0.1, 
+                                             jitter.height = 0.1))+
   facet_wrap(~target_name)+
   ylab("Mean eDNA quantity")+
   xlab("Sample month")+
-  scale_y_log10(labels = label_comma())
-#will need to find a way to get the months in order, jitter the results at zero
+  scale_y_log10(labels = label_comma())+
+  scale_x_discrete(limits=level_order)
+
 
 ggsave(Month_Plot, file = "plots/Month_Plot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
+
+
+
+##### general statistics ######
+
+clean_results %>% 
+  group_by(location, river, target_name,year) %>% 
+  summarize(positive = sum(quant_cat),
+            average = mean(quantity_mean),
+            sdmean=mean(quantity_sd))
+
+
 
