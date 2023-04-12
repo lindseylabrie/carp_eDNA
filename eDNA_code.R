@@ -55,6 +55,19 @@ preds = mod_prob_ab$data %>%
               sample_name = "new") %>% 
   add_epred_draws(mod_prob_ab, allow_new_levels = T) 
 
+# probabilities of differences between above and below samples in each river
+preds %>% 
+  group_by(river, location) %>% 
+  median_qi(.epred)
+
+# probability of below spillway samples always being higher than above spillway samples
+preds %>% 
+  ungroup() %>% 
+  select(-.row, -.chain, -.iteration) %>% 
+  pivot_wider(names_from = location, values_from = .epred) %>% 
+  mutate(diff = below - above) %>% 
+  # summarize(total_greater = sum(diff>0))
+  median_qi(diff)
 
 preds_graph <- preds %>% 
   ggplot(aes(x = location, y = .epred, fill = river)) +
