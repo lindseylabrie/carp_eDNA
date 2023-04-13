@@ -88,6 +88,7 @@ conditional_effects(mod_prob_ab, conditions = tibble(target_name = "BHC"))
 
 pp_check(mod_prob_ab)
 bayes_R2(mod_prob_ab)
+summary(mod_prob_ab)
 
 ggplot(data=clean_results,aes(x=quant_1000, y=quant_cat))+
   geom_point()+
@@ -164,6 +165,7 @@ conditional_effects(mod_prob_ab_sens, conditions = tibble(target_name = "BHC"))
 
 pp_check(mod_prob_ab_sens)
 bayes_R2(mod_prob_ab_sens)
+summary(mod_prob_ab_sens)
 
 
 ####### Field Filtered vs. Lab Filtered ######
@@ -185,6 +187,20 @@ preds_filter = mod_prob_filter$data %>%
   expand_grid(quant_cat = mean(clean_results$quant_cat), 
               sample_name = "new") %>% 
   add_epred_draws(mod_prob_filter, allow_new_levels = T) 
+
+# probabilities of differences between above and below samples in each river
+preds_filter %>% 
+  group_by(filter_method) %>% 
+  median_qi(.epred)
+
+# probability of below spillway samples always being higher than above spillway samples
+preds_filter %>% 
+  ungroup() %>% 
+  select(-.row, -.chain, -.iteration) %>% 
+  pivot_wider(names_from = filter_method, values_from = .epred) %>% 
+  mutate(diff = field - lab) %>% 
+  # summarize(total_greater = sum(diff>0))
+  median_qi(diff)
 
 
 preds_filter_graph <- preds_filter %>% 
@@ -208,6 +224,7 @@ conditional_effects(mod_prob_filter, conditions = tibble(target_name = "BHC"))
 
 pp_check(mod_prob_filter)
 bayes_R2(mod_prob_filter)
+summary(mod_prob_filter)
 
 # no need for sensitivity analysis here -Jeff
 
@@ -297,7 +314,7 @@ ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750,
 Volume_Plot_pilot <- ggplot(data=pilot_averages,
        aes(y=quantity_mean, x=volume_filtered_ml))+
   geom_point()+
-  geom_boxplot(aes(group=volume_filtered_ml))+
+  # geom_boxplot(aes(group=volume_filtered_ml))+
   facet_wrap(~protocol)+
   ylab("Mean eDNA quantity")+
   xlab("Volume filtered")
@@ -308,7 +325,7 @@ ggsave(Volume_Plot_pilot, file = "plots/Volume_Plot_pilot.png", dpi = 750,
 Volume_Plot_data <- ggplot(data=clean_results,
                       aes(y=quantity_mean, x=volume_filtered_ml))+
   geom_point(aes(color=location))+
-  geom_boxplot(aes(group=location, fill=location))+
+  # geom_boxplot(aes(group=location, fill=location))+
   facet_wrap(~target_name)+
   ylab("Mean eDNA quantity")+
   xlab("Volume filtered")+
