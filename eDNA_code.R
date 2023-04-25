@@ -264,50 +264,8 @@ ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750,
 # using Kristie's protocol during extraction. Qiagen and kristie's get large amounts of DNA 
 # as evidenced by the BHC model
 
-# get_prior(quantity_mean~protocol+(1|target_name),
-#           data=pilot_averages,
-#           family=Gamma(),
-#           link="inverse")
 
-# mod_prob_pilot <- brm(quantity_mean~protocol+(1|target_name),
-#                       data=pilot_averages %>% mutate(quantity_mean=quantity_mean+0.001),
-#                       family=Gamma(),
-#                       # prior=c(prior(normal(-10,1), class= "Intercept"),
-#                       #         prior(normal(0,1), class= "b")),
-#                       # sample_prior = "only",
-#                       chains=1, iter = 2000)
-# 
-# 
-# preds_pilot = mod_prob_pilot$data %>% 
-#   expand_grid(quant_mean = mean(pilot_averages$quantity_mean), 
-#               sample_name = "new") %>% 
-#   add_epred_draws(mod_prob_ab, allow_new_levels = T) 
-# 
-# 
-# preds_pilot_graph <- preds_pilot %>% 
-#   ggplot(aes(x = , y = .epred, fill = river)) +
-#   geom_boxplot(outlier.shape = NA) +
-#   facet_wrap(~target_name)+
-#   labs(y="Probability of a positive sample") +  
-#   geom_point(data = mod_prob_pilot$data, 
-#              aes(y = quant_cat, color = river, 
-#                  group = interaction(river, location)), 
-#              position = position_jitterdodge(jitter.width = 0.3, 
-#                                              jitter.height = 0),
-#              shape = 21, alpha = 0.2)
-# 
-# ggsave(preds_pilot_graph, file = "plots/positive_predictions.png", dpi = 750, 
-#        width = 7, height = 5, units = "in")
-# 
-# conditional_effects(mod_prob_pilot, conditions = tibble(target_name = "BHC"))
-# 
-# pp_check(mod_prob_pilot)
-# bayes_R2(mod_prob_pilot)
-
-
-
-
-###### other models, no, sanity checks, to consider ######
+###### other sanity checks to consider ######
 
 # volume of water filtered and quantity of DNA
 
@@ -318,6 +276,8 @@ Volume_Plot_pilot <- ggplot(data=pilot_averages,
   facet_wrap(~protocol)+
   ylab("Mean eDNA quantity")+
   xlab("Volume filtered")
+
+max(clean_results$volume_filtered_ml)
 
 ggsave(Volume_Plot_pilot, file = "plots/Volume_Plot_pilot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
