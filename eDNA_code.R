@@ -253,7 +253,7 @@ Protocol_Plot <- ggplot(data=pilot_averages,
   geom_point()+
   geom_boxplot(aes(group=protocol))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
+  ylab("Mean eDNA quantity (copies/μL)")+
   xlab("Protocol type")
 
 ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750, 
@@ -272,10 +272,10 @@ ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750,
 Volume_Plot_pilot <- ggplot(data=pilot_averages,
        aes(y=quantity_mean, x=volume_filtered_ml))+
   geom_point()+
-  # geom_boxplot(aes(group=volume_filtered_ml))+
+  geom_boxplot(aes(group=volume_filtered_ml))+
   facet_wrap(~protocol)+
-  ylab("Mean eDNA quantity")+
-  xlab("Volume filtered")
+  ylab("Mean eDNA quantity (in copies/μL)")+
+  xlab("Volume filtered (in mL)")
 
 max(clean_results$volume_filtered_ml)
 
@@ -287,8 +287,8 @@ Volume_Plot_data <- ggplot(data=clean_results,
   geom_point(aes(color=location))+
   # geom_boxplot(aes(group=location, fill=location))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
-  xlab("Volume filtered")+
+  ylab("Mean eDNA quantity (copies/μL)")+
+  xlab("Volume filtered (mL)")+
   scale_y_log10(labels = label_comma())
 
 ggsave(Volume_Plot_data, file = "plots/Volume_Plot_data.png", dpi = 750, 
@@ -301,8 +301,8 @@ Time_Plot <- ggplot(data=clean_results,
   geom_point(aes(color=location))+
   # geom_boxplot(aes(group=location,fill=location))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
-  xlab("Time between sample and filter")+
+  ylab("Mean eDNA quantity (copies/μL)")+
+  xlab("Time between sample and filter (hours)")+
   scale_y_log10(labels = label_comma())+ 
   theme(panel.spacing.x = unit(2, "lines"))
     
@@ -318,13 +318,13 @@ Filter_to_Extraction <- ggplot(data=clean_results,
   geom_point(aes(color=location))+
   # geom_boxplot(aes(group=location,fill=location))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
+  ylab("Mean eDNA quantity (copies/μL)")+
   xlab("Days between filtering and extraction")+
   scale_y_log10(labels = label_comma())+ 
   theme(panel.spacing.x = unit(2, "lines"))
 
 ggsave(Filter_to_Extraction, file = "plots/Filter_to_Extraction.png", dpi = 750, 
-       width = 7, height = 5, units = "in")
+       width = 5, height = 3, units = "in")
 
 # days between extraction and qPCR affecting the amount of DNA found in the sample
 
@@ -333,12 +333,12 @@ Extraction_to_qPCR <- ggplot(data=clean_results,
   geom_point(aes(color=location))+
   # geom_boxplot(aes(group=location,fill=location))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
+  ylab("Mean eDNA quantity (copies/μL)")+
   xlab("Days between extraction and qPCR")+
   scale_y_log10(labels = label_comma())
 
 ggsave(Extraction_to_qPCR, file = "plots/Extraction_to_qPCR.png", dpi = 750, 
-       width = 7, height = 5, units = "in")
+       width = 5, height = 3, units = "in")
 
 # does Month play a role?
 
@@ -352,7 +352,7 @@ Month_Plot <- ggplot(data=clean_results,
              position = position_jitterdodge(jitter.width = 0.1, 
                                              jitter.height = 0.1))+
   facet_wrap(~target_name)+
-  ylab("Mean eDNA quantity")+
+  ylab("Mean eDNA quantity (copies/μL)")+
   xlab("Sample month")+
   scale_y_log10(labels = label_comma())+
   scale_x_discrete(limits=level_order)
