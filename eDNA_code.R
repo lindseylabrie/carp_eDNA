@@ -66,12 +66,11 @@ preds %>%
   select(-.row, -.chain, -.iteration) %>% 
   pivot_wider(names_from = location, values_from = .epred) %>% 
   mutate(diff = below - above) %>% 
-  # summarize(total_greater = sum(diff>0))
-  median_qi(diff)
+  summarize(total_greater = sum(diff>0)/nrow(.))
+  median_qi(diff) 
 
 preds_graph <- preds %>% 
   ggplot(aes(x = location, y = .epred, fill = river)) +
-  geom_boxplot(outlier.shape = NA) +
   facet_wrap(~target_name)+
   labs(y="Probability of a positive sample") +  
   geom_point(data = mod_prob_ab$data, 
@@ -79,10 +78,14 @@ preds_graph <- preds %>%
                  group = interaction(river, location)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
-             shape = 21, alpha = 0.2)
+             shape = 21, alpha = 0.2)+ 
+  geom_boxplot(outlier.shape = NA)
 
 ggsave(preds_graph, file = "plots/positive_predictions.png", dpi = 750, 
        width = 7, height = 5, units = "in")
+
+ggsave(preds_graph, file = "plots/positive_predictions_compare.png", dpi = 750, 
+       width = 3.5, height = 3, units = "in")
 
 conditional_effects(mod_prob_ab, conditions = tibble(target_name = "BHC"))
 
@@ -146,20 +149,19 @@ preds_sens = mod_prob_ab_sens$data %>%
 
 
 preds_sens_graph <- preds_sens %>% 
-  ggplot(aes(x = location, y = .epred, fill = river)) +
-  geom_boxplot(outlier.shape = NA) +
+  ggplot(aes(x = location, y = .epred, fill = river))  +
   facet_wrap(~target_name)+
-  labs(y="Probability of a positive sample",
-       title="Sensitivity Analysis Result") +  
+  labs(y="Probability of a positive sample") +  
   geom_point(data = mod_prob_ab_sens$data, 
              aes(y = quant_cat, color = river, 
                  group = interaction(river, location)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
-             shape = 21, alpha = 0.2)
+             shape = 21, alpha = 0.2)+
+  geom_boxplot(outlier.shape = NA)
 
 ggsave(preds_sens_graph, file = "plots/sensitivity_analysis.png", dpi = 750, 
-       width = 7, height = 5, units = "in")
+       width = 3.5, height = 3, units = "in")
 
 conditional_effects(mod_prob_ab_sens, conditions = tibble(target_name = "BHC"))
 
@@ -193,13 +195,13 @@ preds_filter %>%
   group_by(filter_method) %>% 
   median_qi(.epred)
 
-# probability of below spillway samples always being higher than above spillway samples
+# probability of lab vs field filtered
 preds_filter %>% 
   ungroup() %>% 
   select(-.row, -.chain, -.iteration) %>% 
   pivot_wider(names_from = filter_method, values_from = .epred) %>% 
   mutate(diff = field - lab) %>% 
-  # summarize(total_greater = sum(diff>0))
+  # summarize(total_greater = sum(diff>0)/nrow(.))
   median_qi(diff)
 
 
