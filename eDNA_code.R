@@ -190,7 +190,7 @@ preds_filter = mod_prob_filter$data %>%
               sample_name = "new") %>% 
   add_epred_draws(mod_prob_filter, allow_new_levels = T) 
 
-# probabilities of differences between above and below samples in each river
+# probabilities of differences between lab and field filtered
 preds_filter %>% 
   group_by(filter_method) %>% 
   median_qi(.epred)
@@ -204,13 +204,13 @@ preds_filter %>%
   # summarize(total_greater = sum(diff>0)/nrow(.))
   median_qi(diff)
 
-
-preds_filter_graph <- preds_filter %>% 
+# graph on a non log scale
+preds_filter_graph_reg <- preds_filter %>% 
   ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
   geom_boxplot(outlier.shape = NA) +
   facet_wrap(~target_name)+
   labs(y="Probability of detection",
-       x="Filter method") +  
+       x="Filter method") +
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
                  # group = interaction(filter_method, target_name)), 
@@ -218,9 +218,30 @@ preds_filter_graph <- preds_filter %>%
                                              jitter.height = 0),
              shape = 21, alpha = 0.5)+
   theme(legend.position="none")
+  # scale_y_log10(breaks=c(0,0.0001,1), labels = function(x) format(x, scientific = FALSE))
 
-ggsave(preds_filter_graph, file = "plots/positive_predictions.png", dpi = 750, 
+ggsave(preds_filter_graph_reg, file = "plots/filter_location.png", dpi = 750, 
        width = 7, height = 5, units = "in")
+
+# graph on a log 10 scale
+preds_filter_graph_log10 <- preds_filter %>% 
+  ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
+  geom_boxplot(outlier.shape = NA) +
+  facet_wrap(~target_name)+
+  labs(y="Probability of detection",
+       x="Filter method") +
+  geom_point(data = mod_prob_filter$data, 
+             aes(y = quant_cat),
+             # group = interaction(filter_method, target_name)), 
+             position = position_jitterdodge(jitter.width = 0.3, 
+                                             jitter.height = 0),
+             shape = 21, alpha = 0.5)+
+  theme(legend.position="none")+
+  scale_y_log10(breaks=c(0,0.0001,1), labels = function(x) format(x, scientific = FALSE))
+
+ggsave(preds_filter_graph_log10, file = "plots/filter_location_log10.png", dpi = 750, 
+       width = 7, height = 5, units = "in")
+
 
 conditional_effects(mod_prob_filter, conditions = tibble(target_name = "BHC"))
 
