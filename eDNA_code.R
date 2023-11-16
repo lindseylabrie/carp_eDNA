@@ -213,7 +213,6 @@ preds_filter_graph_reg <- preds_filter %>%
        x="Filter method") +
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
-                 # group = interaction(filter_method, target_name)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
              shape = 21, alpha = 0.5)+
@@ -232,15 +231,14 @@ preds_filter_graph_log10 <- preds_filter %>%
        x="Filter method") +
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
-             # group = interaction(filter_method, target_name)), 
-             position = position_jitterdodge(jitter.width = 0.3, 
+             position = position_jitterdodge(jitter.width = 0.2, 
                                              jitter.height = 0),
              shape = 21, alpha = 0.5)+
   theme(legend.position="none")+
-  scale_y_log10(breaks=c(0,0.0001,1), labels = function(x) format(x, scientific = FALSE))
+  scale_y_log10(breaks=c(0,0.0001,0.01, 1), labels = function(x) format(x, scientific = FALSE))
 
 ggsave(preds_filter_graph_log10, file = "plots/filter_location_log10.png", dpi = 750, 
-       width = 7, height = 5, units = "in")
+       width = 6, height = 4.5, units = "in")
 
 
 conditional_effects(mod_prob_filter, conditions = tibble(target_name = "BHC"))
@@ -277,7 +275,8 @@ Protocol_Plot <- ggplot(data=pilot_averages,
   geom_boxplot(aes(group=protocol))+
   facet_wrap(~target_name)+
   ylab("Mean eDNA quantity (copies/μL)")+
-  xlab("Protocol type")
+  xlab("Protocol type")+
+  scale_y_log10(labels = function(x) format(x, scientific = FALSE))
 
 ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
