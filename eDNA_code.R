@@ -58,7 +58,7 @@ preds = mod_prob_ab$data %>%
 # probabilities of differences between above and below samples in each river
 preds %>% 
   group_by(river, location) %>% 
-  median_qi(.epred,.width=0.5)
+  median_qi(.epred,.width=0.05)
 
 # probability of below spillway samples always being higher than above spillway samples
 preds %>% 
@@ -72,13 +72,14 @@ preds %>%
 preds_graph <- preds %>% 
   ggplot(aes(x = location, y = .epred, fill = river)) +
   facet_wrap(~target_name)+
-  labs(y="Probability of a positive sample") +  
+  scale_fill_discrete(name = "River", labels = c("Big Sioux", "Vermillion"))+
+  labs(y="Posterior probability of a positive sample")+
   geom_point(data = mod_prob_ab$data, 
              aes(y = quant_cat, color = river, 
                  group = interaction(river, location)), 
              position = position_jitterdodge(jitter.width = 0.3, 
                                              jitter.height = 0),
-             shape = 21, alpha = 0.2)+ 
+             shape = 21, alpha = 0.2) + 
   geom_boxplot(outlier.shape = NA)
 
 ggsave(preds_graph, file = "plots/positive_predictions.png", dpi = 750, 
