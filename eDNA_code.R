@@ -58,7 +58,7 @@ preds = mod_prob_ab$data %>%
 # probabilities of differences between above and below samples in each river
 preds %>% 
   group_by(river, location) %>% 
-  median_qi(.epred)
+  median_qi(.epred,.width=0.5)
 
 # probability of below spillway samples always being higher than above spillway samples
 preds %>% 
@@ -263,8 +263,8 @@ pilot_averages %>%
   sample_n(1) %>% 
   distinct(quant_cat) 
 
-# at 1 sample for each location with known carp, 4/40 samples are false negatives
-# i.e. a 10% chance that any sample is a false positive. This number halves as the
+# at 1 sample for each location with known carp, 1/10 replicates are false negatives
+# i.e. a 10% chance that any replicate is a false positive. This number halves as the
 # number of samples increases.
 
 ### Difference in protocols? ###
@@ -300,6 +300,7 @@ Volume_Plot_pilot <- ggplot(data=pilot_averages,
   xlab("Volume filtered (in mL)")
 
 max(clean_results$volume_filtered_ml)
+sd(clean_results$volume_filtered_ml)
 
 ggsave(Volume_Plot_pilot, file = "plots/Volume_Plot_pilot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
