@@ -228,7 +228,7 @@ preds_filter_graph_log10 <- preds_filter %>%
   ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
   geom_boxplot(outlier.shape = NA) +
   facet_wrap(~target_name)+
-  labs(y="Probability of detection",
+  labs(y="Posterior probability of a positive sample",
        x="Filter method") +
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
