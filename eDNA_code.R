@@ -57,8 +57,60 @@ preds = mod_prob_ab$data %>%
 
 # probabilities of differences between above and below samples in each river
 preds %>% 
-  group_by(river, location) %>% 
+  group_by(location,river) %>% 
   median_qi(.epred,.width=0.05)
+
+preds_graph1 <- preds %>% 
+  ggplot(aes(x = river, y = .epred, fill = river)) +
+  facet_wrap(~target_name+location, labeller = labeller(location = 
+                                                  c("above" = "Above Barrier",
+                                                    "below" = "Below Barrier"),
+                                                  river = 
+                                                    c("vermillion" = "",
+                                                      "big sioux"= ""),
+                                                  target_name =
+                                                    c("BHC"="Bighead Carp",
+                                                      "SVC"="Silver Carp")))+
+
+  scale_fill_discrete(name = "River", labels = c("Big Sioux", "Vermillion"))+
+  labs(y="Posterior probability of a positive sample",
+       x="")+
+  geom_point(data = mod_prob_ab$data, 
+             aes(y = quant_cat, color = river, 
+                 group = interaction(river, location)), 
+             position = position_jitterdodge(jitter.width = 0.3, 
+                                             jitter.height = 0),
+             shape = 21, alpha = 0.2) + 
+  geom_boxplot(outlier.shape = NA)
+
+ggsave(preds_graph1, file = "plots/positive_preds_facet.png", dpi = 750, 
+       width = 4, height = 5, units = "in")
+
+preds %>% 
+  ggplot(aes(x = river, y = .epred, fill = river)) +
+  facet_wrap(~location+target_name, labeller = labeller(location = 
+                                                          c("above" = "Above Barrier",
+                                                            "below" = "Below Barrier"),
+                                                        river = 
+                                                          c("vermillion" = "",
+                                                            "big sioux"= ""),
+                                                        target_name =
+                                                          c("BHC"="Bighead Carp",
+                                                            "SVC"="Silver Carp")))+
+  
+  scale_fill_discrete(name = "River", labels = c("Big Sioux", "Vermillion"))+
+  labs(y="Posterior probability of a positive sample",
+       x="")+
+  geom_point(data = mod_prob_ab$data, 
+             aes(y = quant_cat, color = river, 
+                 group = interaction(river, location)), 
+             position = position_jitterdodge(jitter.width = 0.3, 
+                                             jitter.height = 0),
+             shape = 21, alpha = 0.2) + 
+  geom_boxplot(outlier.shape = NA)
+
+ggsave(preds_graph1, file = "plots/positive_preds_facet.png", dpi = 750, 
+       width = 4, height = 5, units = "in")
 
 # probability of below spillway samples always being higher than above spillway samples
 preds %>% 
@@ -66,7 +118,7 @@ preds %>%
   select(-.row, -.chain, -.iteration) %>% 
   pivot_wider(names_from = location, values_from = .epred) %>% 
   mutate(diff = below - above) %>% 
-  summarize(total_greater = sum(diff>0)/nrow(.))
+  summarize(total_greater = sum(diff>0)/nrow(.)) 
   median_qi(diff) 
 
 preds_graph <- preds %>% 
@@ -210,7 +262,7 @@ preds_filter_graph_reg <- preds_filter %>%
   ggplot(aes(x = filter_method, y = .epred, fill = target_name)) +
   geom_boxplot(outlier.shape = NA) +
   facet_wrap(~target_name)+
-  labs(y="Probability of detection",
+  labs(y="Posterior probability of a positive sample",
        x="Filter method") +
   geom_point(data = mod_prob_filter$data, 
              aes(y = quant_cat),
