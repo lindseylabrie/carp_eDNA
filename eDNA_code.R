@@ -331,11 +331,27 @@ Protocol_Plot <- ggplot(data=pilot_averages,
   xlab("Protocol type")+
   scale_y_log10(labels = function(x) format(x, scientific = FALSE))
 
+ggplot(data=pilot_averages,
+       aes(y=quantity_mean, x=protocol))+
+  geom_point()+
+  geom_boxplot(aes(group=protocol))+
+  ylab("Mean eDNA quantity (copies/μL)")+
+  xlab("Protocol type")+
+  scale_y_log10(labels = function(x) format(x, scientific = FALSE))
+
 ggsave(Protocol_Plot, file = "plots/Protocol_Plot.png", dpi = 750, 
        width = 7, height = 5, units = "in")
 
 
-# probably don't need to run a model based on this. Can use it as a justification for 
+
+pilot_averages %>% 
+  group_by(protocol,location,target_name) %>% 
+  summarize(mean = mean(quantity_mean),
+            median = median(quantity_mean),
+            sdmean=mean(quantity_sd))
+
+
+ # probably don't need to run a model based on this. Can use it as a justification for 
 # using Kristie's protocol during extraction. Qiagen and kristie's get large amounts of DNA 
 # as evidenced by the BHC model
 
